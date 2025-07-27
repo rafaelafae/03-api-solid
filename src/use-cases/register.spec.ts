@@ -1,15 +1,20 @@
 import { InMemoryUsersRepository } from '@/repositories/in-memory/in-memory-users-repository'
 import { UserAlreadyExistsError } from './errors/user-already-exists-error'
 import { RegisterUseCase } from './register'
-import { expect, describe, it } from 'vitest'
+import { expect, describe, it, beforeEach } from 'vitest'
 import { compare } from 'bcryptjs'
+
+let usersRepository: InMemoryUsersRepository
+let sut: RegisterUseCase
 
 describe('Register Use Case', () => {
 
-    it('should be able to register', async () => {
+    beforeEach(() => {
+        usersRepository = new InMemoryUsersRepository()
+        sut = new RegisterUseCase(usersRepository)
+    })
 
-        const usersRepository = new InMemoryUsersRepository()
-        const sut = new RegisterUseCase(usersRepository)
+    it('should be able to register', async () => {
 
         const { user } = await sut.execute({
             name: 'John Doe',
@@ -17,13 +22,11 @@ describe('Register Use Case', () => {
             password: '123456',
         })
 
-        expect(user.id).toEqual(expect.any(String))
+        expect(user.id)
+            .toEqual(expect.any(String))
     })
 
     it('should hash user password upon registrations', async () => {
-
-        const usersRepository = new InMemoryUsersRepository()
-        const sut = new RegisterUseCase(usersRepository)
 
         const { user } = await sut.execute({
             name: 'John Doe',
@@ -36,13 +39,11 @@ describe('Register Use Case', () => {
             user.password_hash,
         )
 
-        expect(isPasswordCorrectlyHashed).toBe(true)
+        expect(isPasswordCorrectlyHashed)
+            .toBe(true)
     })
 
     it('should not be able to register with same email twice', async () => {
-
-        const usersRepository = new InMemoryUsersRepository()
-        const sut = new RegisterUseCase(usersRepository)
 
         const email = 'johndoe@example.com'
 
@@ -58,6 +59,7 @@ describe('Register Use Case', () => {
                 email,
                 password: '123456',
             }),
-        ).rejects.toBeInstanceOf(UserAlreadyExistsError)
+        ).rejects
+            .toBeInstanceOf(UserAlreadyExistsError)
     })
 })
