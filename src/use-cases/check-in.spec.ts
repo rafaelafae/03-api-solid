@@ -1,7 +1,9 @@
 import { InMemoryCheckInsRepository } from '@/repositories/in-memory/in-memory-check-ins-repository'
-import { InMemoryGymRepository } from '@/repositories/in-memory/in-memory-gym-repository'
-import { expect, describe, it, beforeEach, vi, afterEach } from 'vitest'
+import { InMemoryGymRepository } from '@/repositories/in-memory/in-memory-gyms-repository'
+import { MaxDistanceError } from './errors/max-distance-error'
+import { MaxNumberCheckIns } from './errors/max-number-of-check-ins-error'
 import { CheckInUseCase } from './check-in'
+import { expect, describe, it, beforeEach, vi, afterEach } from 'vitest'
 import { Decimal } from '@prisma/client/runtime/library'
 
 let checkInsRepository: InMemoryCheckInsRepository
@@ -9,18 +11,18 @@ let gymsRepository: InMemoryGymRepository
 let sut: CheckInUseCase
 
 describe('Check In Use Case', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         checkInsRepository = new InMemoryCheckInsRepository()
         gymsRepository = new InMemoryGymRepository()
         sut = new CheckInUseCase(checkInsRepository, gymsRepository)
 
-        gymsRepository.items.push({
+        await gymsRepository.create({
             id: 'gym-01',
             title: 'Academia JS',
             description: "",
-            latitude: new Decimal(0),
-            longitude: new Decimal(0),
             phone: "",
+            latitude: -23.5864064,
+            longitude: -46.7206144,
         })
 
         vi.useFakeTimers()
@@ -61,7 +63,7 @@ describe('Check In Use Case', () => {
                 userLatitude: -23.5864064,
                 userLongitude: -46.7206144,
             }),
-        ).rejects.toBeInstanceOf(Error)
+        ).rejects.toBeInstanceOf(MaxNumberCheckIns)
     })
 
     it('should be able to check in twice in different days', async () => {
@@ -85,6 +87,29 @@ describe('Check In Use Case', () => {
         })
 
         expect(checkIn.id).toEqual(expect.any(String))
+    })
+
+    it('should not be able to check in on distant gym', async () => {
+
+        gymsRepository.items.push({
+            id: 'gym-02',
+            title: 'Academia JS',
+            description: "",
+            latitude: new Decimal(-23.5864064),
+            longitude: new Decimal(-46.7206144),
+            phone: "",
+        })
+
+        await expect(() =>
+            sut.execute({
+                userId: 'user-0',
+                gymId: 'gym-02',
+                userLatitude: -23.591448,
+                userLongitude: -46.6898191,
+            }),
+        ).rejects
+            .toBeInstanceOf(MaxDistanceError)
+
     })
 
 })
