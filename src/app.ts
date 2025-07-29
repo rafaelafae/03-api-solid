@@ -1,3 +1,4 @@
+import { checkInRoutes } from "./http/controllers/check-ins/routes";
 import { gymsRoutes } from "./http/controllers/gyms/routes";
 import { usersRoutes } from "./http/controllers/users/routes";
 import fastify from "fastify";
@@ -14,6 +15,7 @@ app.register(fastifyJwt, {
 
 app.register(usersRoutes)
 app.register(gymsRoutes)
+app.register(checkInRoutes)
 
 app.setErrorHandler((error, _request, reply) => {
 

@@ -5,7 +5,7 @@ import { metrics } from "./metrics-controller";
 import { FastifyInstance } from "fastify";
 import { verifyJWT } from "../../middlewares/verify-jwt";
 
-export async function gymsRoutes(app: FastifyInstance) {
+export async function checkInRoutes(app: FastifyInstance) {
     app.addHook('onRequest', verifyJWT) // Rotas daqui para baixo chamam antes a verificação de autenticação
 
     app.get('/check-ins/history', history)
