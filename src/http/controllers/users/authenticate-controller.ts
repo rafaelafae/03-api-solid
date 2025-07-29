@@ -20,15 +20,30 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
             password,
         })
 
-        const token = await reply.jwtSign({}, { // geração de TOKEN ao logar na aplicação
+        const token = await reply.jwtSign({}, { // Primeiro TOKEN 
             sign: {
                 sub: user.id,
             },
         })
 
-        return reply.status(200).send({
-            token,
+        const refreshToken = await reply.jwtSign({}, { // Segundo TOKEN para ser utilizado como  Refresh Token
+            sign: {
+                sub: user.id,
+                expiresIn: '7d', // o usuário só vai perder a autenticação se ficar 7 dias sem logar
+            },
         })
+
+        return reply
+            .setCookie('refreshToken', refreshToken, {
+                path: '/',
+                secure: true,
+                sameSite: true,
+                httpOnly: true,
+            })
+            .status(200)
+            .send({
+                token,
+            })
 
     } catch (err) {
         if (err instanceof InvalidCredentialsError) {
