@@ -1,6 +1,6 @@
 # App
 
-GymPass style app.
+Desenvolvimento de uma aplicação back-end semelhante ao GymPass.
 
 ## RFs (Requisitos funcionais)
 
