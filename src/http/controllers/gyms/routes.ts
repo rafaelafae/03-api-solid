@@ -3,6 +3,7 @@ import { nearby } from "./nearby-controller";
 import { create } from "./create-controller";
 import { FastifyInstance } from "fastify";
 import { verifyJWT } from "../../middlewares/verify-jwt";
+import { verifyUserRole } from "@/http/middlewares/verify-user-role";
 
 export async function gymsRoutes(app: FastifyInstance) {
     app.addHook('onRequest', verifyJWT) // Rotas daqui para baixo chamam antes a verificação de autenticação
@@ -11,5 +12,5 @@ export async function gymsRoutes(app: FastifyInstance) {
 
     app.get('/gyms/nearby', nearby)
 
-    app.post('/gyms', create)
+    app.post('/gyms', { onRequest: [verifyUserRole('ADMIN')] }, create)
 }

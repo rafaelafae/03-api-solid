@@ -14,7 +14,7 @@ describe('Search Gym E2E', () => {
 
     it('should be able to search gym by title', async () => {
 
-        const { token } = await createAndAuthenticateUser(app)
+        const { token } = await createAndAuthenticateUser(app, true)
 
         await request(app.server).post('/gyms').set('Authorization', `Bearer ${token}`).send({
             title: 'JavaScript Gym',
